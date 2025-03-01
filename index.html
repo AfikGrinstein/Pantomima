@@ -3,180 +3,359 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Animal Image Game - Two Teams</title>
+    <title>Pantomime Game - Two Teams</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(to bottom, #e6f0fa, #f5f5f5);
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #f0f0f0;
             margin: 0;
-            padding: 10px;
+            padding: 15px;
             min-height: 100vh;
         }
         .game-container {
-            text-align: center;
-            background-color: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(to bottom, #ffffff, #e0f7fa);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             width: 90%;
             max-width: 600px;
-            margin: auto;
+            position: relative;
+        }
+        h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(20px, 6vw, 28px);
+            color: #2c3e50;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            margin: 10px 0;
+            text-align: center;
+        }
+        #start-image {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 10px auto;
+            border-radius: 10px;
         }
         #image-display {
             width: 100%;
-            height: 50vw; /* Scales with viewport width */
+            height: 50vw;
             max-height: 300px;
-            margin-bottom: 15px;
-            display: flex;
+            margin-bottom: 20px;
+            display: none;
             align-items: center;
             justify-content: center;
+            background: #fff;
+            border: 10px solid #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            border-radius: 5px;
             overflow: hidden;
+            transition: box-shadow 0.3s ease;
+        }
+        #image-display.glow {
+            animation: glowBorder 1s infinite alternate;
+        }
+        @keyframes glowBorder {
+            0% { box-shadow: 0 0 10px #ff4444, 0 2px 8px rgba(0,0,0,0.15); }
+            100% { box-shadow: 0 0 20px #ff4444, 0 2px 8px rgba(0,0,0,0.15); }
         }
         #animal-image {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
+            transition: opacity 0.3s ease;
         }
-        .button-container {
-            margin: 15px 0;
-            display: flex;
-            flex-wrap: wrap;
+        #animal-image.fade {
+            opacity: 0;
+        }
+        .button-container, .scores-container {
+            display: none;
             justify-content: center;
             gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px 0;
         }
         button {
             padding: 10px 15px;
-            font-size: clamp(14px, 4vw, 16px); /* Scales font size */
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-            flex: 1;
-            max-width: 120px;
-        }
-        #skip-btn {
-            background-color: #ff4444;
-            color: white;
-        }
-        #skip-btn:hover {
-            background-color: #cc0000;
-        }
-        #success-btn {
-            background-color: #00cc00;
-            color: white;
-        }
-        #success-btn:hover {
-            background-color: #009900;
-        }
-        #reset-btn {
-            background-color: #555;
-            color: white;
-        }
-        #reset-btn:hover {
-            background-color: #333;
-        }
-        .scores-container {
-            display: flex;
-            justify-content: space-around;
-            width: 100%;
-            margin-top: 15px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .team-score {
-            font-size: clamp(18px, 5vw, 24px); /* Responsive font size */
-            font-weight: bold;
-            flex: 1;
-            text-align: center;
-        }
-        .score-animate {
-            animation: scoreChange 0.5s ease;
-        }
-        @keyframes scoreChange {
-            0% { transform: scale(1); color: #000; }
-            50% { transform: scale(1.2); color: #007bff; }
-            100% { transform: scale(1); color: #000; }
-        }
-        .team-selector {
-            margin: 10px 0;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-        .team-selector label {
             font-size: clamp(14px, 4vw, 16px);
+            border-radius: 8px;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.2s, background 0.3s;
+            flex: 1;
+            max-width: 100px;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 5px;
+            background: linear-gradient(to bottom, #007bff, #0056d2);
+            position: relative;
         }
-        h1 {
-            font-size: clamp(20px, 6vw, 28px);
+        button:hover {
+            transform: scale(1.05);
+        }
+        #skip-btn {
+            background: linear-gradient(to bottom, #ff4444, #cc0000);
+        }
+        #success-btn {
+            background: linear-gradient(to bottom, #00cc00, #009900);
+        }
+        #reset-btn {
+            display: none;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            max-width: 60px;
+            padding: 8px;
+            font-size: 14px;
+            background: linear-gradient(to bottom, #666, #444);
+        }
+        #reset-btn:hover:after {
+            content: "Restart game";
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #333;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 10;
+        }
+        #start-btn, #next-round-btn, #restart-game-btn {
+            background: linear-gradient(to bottom, #007bff, #0056d2);
+            max-width: 150px;
+            width: 100%;
+            margin: 10px auto;
+        }
+        #next-round-btn, #restart-game-btn {
+            display: none;
+        }
+        .scores-container {
+            margin-top: 20px;
+        }
+        .team-score {
+            font-size: clamp(18px, 5vw, 24px);
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 10px;
+            flex: 1;
+            text-align: center;
+            transition: transform 0.5s;
+        }
+        #team1-score {
+            background: #a0c4ff;
+            color: #1e3799;
+        }
+        #team2-score {
+            background: #ff9999;
+            color: #9e1e1e;
+        }
+        .team-score.winner {
+            border: 3px solid #ffd700;
+            box-shadow: 0 0 15px #ffd700;
+            transform: scale(1.1);
+        }
+        .score-animate {
+            animation: flipScore 0.5s ease;
+        }
+        @keyframes flipScore {
+            0% { transform: rotateX(0); }
+            50% { transform: rotateX(180deg); color: #007bff; }
+            100% { transform: rotateX(360deg); }
+        }
+        .start-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
             margin: 10px 0;
         }
-
-        /* Media query for very small screens */
+        .input-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 120px;
+            max-width: 200px;
+        }
+        .start-container label {
+            font-size: 14px;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        .start-container input, .start-container select {
+            padding: 8px;
+            font-size: 14px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 100%;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .start-container select {
+            background: #fff url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%232c3e50%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095.1c3.6-3.6%205.4-7.8%205.4-12.8%200-5-1.8-9.3-5.4-12.9z%22%2F%3E%3C%2Fsvg%3E') no-repeat right 8px center;
+            background-size: 10px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        #timer-display {
+            display: none;
+            font-size: 20px;
+            color: #2c3e50;
+            text-align: center;
+            margin: 10px 0;
+            transition: text-shadow 0.3s ease, color 0.3s ease;
+        }
+        #timer-display.glow {
+            color: #ff4444;
+            animation: glowText 1s infinite alternate;
+        }
+        @keyframes glowText {
+            0% { text-shadow: 0 0 5px #ff4444; }
+            100% { text-shadow: 0 0 15px #ff4444; }
+        }
+        #team-playing {
+            display: none;
+            font-size: 16px;
+            color: #2c3e50;
+            text-align: center;
+            margin: 5px 0;
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ffd700;
+            animation: confettiFall 2s infinite;
+        }
+        @keyframes confettiFall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
         @media (max-width: 400px) {
             .button-container {
                 flex-direction: column;
-                align-items: center;
             }
             button {
-                width: 100%;
                 max-width: 200px;
+                width: 100%;
             }
-            .team-selector {
+            .scores-container {
                 flex-direction: column;
-                gap: 10px;
+            }
+            .input-group {
+                min-width: 100px;
             }
         }
     </style>
 </head>
 <body>
 <div class="game-container">
-    <h1>Animal Image Game - Two Teams</h1>
+    <h1>Pantomime Game</h1>
+    <button id="reset-btn"><span>↻</span></button>
+    <img id="start-image" src="assets/Hanoch_Rosen.jpg" alt="Hanoch Rosen">
     <div id="image-display">
         <img id="animal-image" src="" alt="Animal Image">
     </div>
-    <div class="team-selector">
-        <label><input type="radio" name="team" value="1" checked> Team 1</label>
-        <label><input type="radio" name="team" value="2"> Team 2</label>
+    <div class="start-container">
+        <div class="input-row">
+            <div class="input-group">
+                <label for="team1-name">Team 1 Name</label>
+                <input type="text" id="team1-name" placeholder="Team 1" value="Team 1">
+            </div>
+            <div class="input-group">
+                <label for="team2-name">Team 2 Name</label>
+                <input type="text" id="team2-name" placeholder="Team 2" value="Team 2">
+            </div>
+        </div>
+        <div class="input-row">
+            <div class="input-group">
+                <label for="timer-select">Round Duration</label>
+                <select id="timer-select">
+                    <option value="60" selected>1 Minute</option>
+                    <option value="90">1.5 Minutes</option>
+                    <option value="120">2 Minutes</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="rounds-select">Number of Rounds</label>
+                <select id="rounds-select">
+                    <option value="1">1 Round</option>
+                    <option value="2">2 Rounds</option>
+                    <option value="3" selected>3 Rounds</option>
+                    <option value="4">4 Rounds</option>
+                    <option value="5">5 Rounds</option>
+                </select>
+            </div>
+        </div>
+        <button id="start-btn">Start Game</button>
     </div>
+    <div id="timer-display">Time Remaining: 1:00</div>
+    <div id="team-playing"></div>
     <div class="button-container">
-        <button id="skip-btn">Skip</button>
-        <button id="success-btn">Success</button>
-        <button id="reset-btn">Reset</button>
+        <button id="skip-btn"><span>✗</span> Skip</button>
+        <button id="success-btn"><span>✓</span> Success</button>
+        <button id="next-round-btn">Next Round</button>
     </div>
     <div class="scores-container">
         <p id="team1-score" class="team-score">Team 1 Score: 0</p>
         <p id="team2-score" class="team-score">Team 2 Score: 0</p>
     </div>
+    <button id="restart-game-btn">Restart Game</button>
 </div>
 
 <script>
     let team1Score = 0;
     let team2Score = 0;
-
+    let team1Name = "Team 1";
+    let team2Name = "Team 2";
+    let timerSeconds = 60;
+    let timerInterval = null;
+    let countdownInterval = null;
+    let currentRound = 0;
+    let totalRounds = 3;
+    let currentTeamIndex = 0;
     const team1ScoreDisplay = document.getElementById('team1-score');
     const team2ScoreDisplay = document.getElementById('team2-score');
     const animalImage = document.getElementById('animal-image');
+    const imageDisplay = document.getElementById('image-display');
     const skipBtn = document.getElementById('skip-btn');
     const successBtn = document.getElementById('success-btn');
     const resetBtn = document.getElementById('reset-btn');
-    const teamRadios = document.getElementsByName('team');
-
-    // List of animal image URLs (placeholders; replace with your own)
+    const startBtn = document.getElementById('start-btn');
+    const nextRoundBtn = document.getElementById('next-round-btn');
+    const restartGameBtn = document.getElementById('restart-game-btn');
+    const buttonContainer = document.querySelector('.button-container');
+    const scoresContainer = document.querySelector('.scores-container');
+    const startContainer = document.querySelector('.start-container');
+    const startImage = document.getElementById('start-image');
+    const team1NameInput = document.getElementById('team1-name');
+    const team2NameInput = document.getElementById('team2-name');
+    const timerSelect = document.getElementById('timer-select');
+    const roundsSelect = document.getElementById('rounds-select');
+    const timerDisplay = document.getElementById('timer-display');
+    const teamPlayingDisplay = document.getElementById('team-playing');
     const animalImages = [
-        'https://images.unsplash.com/photo-1518791841217-8f162f1e1131', // Cat
-        'https://images.unsplash.com/photo-1534361960057-1988672fe431', // Dog
-        'https://images.unsplash.com/photo-1561948955-570b270e7c36', // Elephant
-        'https://images.unsplash.com/photo-1546182990-dffeafbe841d', // Tiger
-        'https://images.unsplash.com/photo-1596854407944-bf87f6fdd49e', // Panda
-        'https://images.unsplash.com/photo-1519052537078-e630222a2299', // Bear
-        'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55', // Lion
-        'https://images.unsplash.com/photo-1591825473368-c5a5a5a9f8f8', // Monkey (fixed URL)
+        'https://images.unsplash.com/photo-1518791841217-8f162f1e1131',
+        'https://images.unsplash.com/photo-1534361960057-1988672fe431',
+        'https://images.unsplash.com/photo-1561948955-570b270e7c36',
+        'https://images.unsplash.com/photo-1546182990-dffeafbe841d',
+        'https://images.unsplash.com/photo-1596854407944-bf87f6fdd49e',
+        'https://images.unsplash.com/photo-1519052537078-e630222a2299',
+        'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55',
+        'https://images.unsplash.com/photo-1591825473368-c5a5a5a9f8f8',
     ];
     let usedImages = [];
     let availableImages = [...animalImages];
@@ -194,29 +373,156 @@
     }
 
     function updateImage() {
-        animalImage.src = getRandomImage();
+        animalImage.classList.add('fade');
+        setTimeout(() => {
+            animalImage.src = getRandomImage();
+            animalImage.classList.remove('fade');
+        }, 300);
     }
 
     function getSelectedTeam() {
-        for (const radio of teamRadios) {
-            if (radio.checked) {
-                return parseInt(radio.value);
-            }
-        }
-        return 1;
+        return currentTeamIndex === 0 ? 1 : 2;
     }
 
     function updateScore(team, change) {
         if (team === 1) {
             team1Score += change;
-            team1ScoreDisplay.textContent = `Team 1 Score: ${team1Score}`;
-            team1ScoreDisplay.classList.add('score-animate');
-            setTimeout(() => team1ScoreDisplay.classList.remove('score-animate'), 500);
+            team1ScoreDisplay.textContent = `${team1Name} Score: ${team1Score}`;
         } else {
             team2Score += change;
-            team2ScoreDisplay.textContent = `Team 2 Score: ${team2Score}`;
-            team2ScoreDisplay.classList.add('score-animate');
-            setTimeout(() => team2ScoreDisplay.classList.remove('score-animate'), 500);
+            team2ScoreDisplay.textContent = `${team2Name} Score: ${team2Score}`;
+        }
+        const display = team === 1 ? team1ScoreDisplay : team2ScoreDisplay;
+        display.classList.add('score-animate');
+        setTimeout(() => display.classList.remove('score-animate'), 500);
+    }
+
+    function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs < 10 ? '0' + secs : secs}`;
+    }
+
+    function startCountdown(callback) {
+        let countdown = 5;
+        timerDisplay.textContent = `Round ${currentRound + 1} - ${getSelectedTeam() === 1 ? team1Name : team2Name} Starts in: ${countdown}`;
+        timerDisplay.style.display = 'block';
+        teamPlayingDisplay.style.display = 'none';
+        imageDisplay.style.display = 'none';
+        skipBtn.style.display = 'none';
+        successBtn.style.display = 'none';
+        nextRoundBtn.style.display = 'none';
+        countdownInterval = setInterval(() => {
+            countdown--;
+            timerDisplay.textContent = `Round ${currentRound + 1} - ${getSelectedTeam() === 1 ? team1Name : team2Name} Starts in: ${countdown}`;
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                callback();
+            }
+        }, 1000);
+    }
+
+    function startTimer() {
+        timerSeconds = parseInt(timerSelect.value);
+        const currentTeam = getSelectedTeam() === 1 ? team1Name : team2Name;
+        timerDisplay.textContent = `Time Remaining: ${formatTime(timerSeconds)}`;
+        teamPlayingDisplay.textContent = `${currentTeam} Playing...`;
+        teamPlayingDisplay.style.display = 'block';
+        imageDisplay.style.display = 'flex';
+        skipBtn.style.display = 'flex';
+        successBtn.style.display = 'flex';
+        nextRoundBtn.style.display = 'none';
+        timerInterval = setInterval(() => {
+            timerSeconds--;
+            timerDisplay.textContent = `Time Remaining: ${formatTime(timerSeconds)}`;
+            if (timerSeconds <= 10) {
+                timerDisplay.classList.add('glow');
+                imageDisplay.classList.add('glow');
+            } else {
+                timerDisplay.classList.remove('glow');
+                imageDisplay.classList.remove('glow');
+            }
+            if (timerSeconds <= 0) {
+                clearInterval(timerInterval);
+                timerDisplay.textContent = "Time's Up!";
+                timerDisplay.classList.remove('glow');
+                imageDisplay.classList.remove('glow');
+                skipBtn.style.display = 'none';
+                successBtn.style.display = 'none';
+                teamPlayingDisplay.style.display = 'none';
+                if (currentTeamIndex === 0) {
+                    currentTeamIndex = 1;
+                    startCountdown(() => {
+                        startTimer();
+                        updateImage();
+                    });
+                } else {
+                    currentTeamIndex = 0;
+                    if (currentRound < totalRounds - 1) {
+                        nextRoundBtn.style.display = 'flex';
+                    } else {
+                        endGame();
+                    }
+                }
+            }
+        }, 1000);
+    }
+
+    function startGame() {
+        team1Name = team1NameInput.value.trim() || "Team 1";
+        team2Name = team2NameInput.value.trim() || "Team 2";
+        team1ScoreDisplay.textContent = `${team1Name} Score: ${team1Score}`;
+        team2ScoreDisplay.textContent = `${team2Name} Score: ${team2Score}`;
+        totalRounds = parseInt(roundsSelect.value);
+        currentRound = 0;
+        currentTeamIndex = 0;
+        startContainer.style.display = 'none';
+        startImage.style.display = 'none';
+        resetBtn.style.display = 'flex';
+        buttonContainer.style.display = 'flex';
+        scoresContainer.style.display = 'flex';
+        startCountdown(() => {
+            startTimer();
+            updateImage();
+        });
+    }
+
+    function nextRound() {
+        currentRound++;
+        currentTeamIndex = 0;
+        nextRoundBtn.style.display = 'none';
+        usedImages = [];
+        availableImages = [...animalImages];
+        startCountdown(() => {
+            startTimer();
+            updateImage();
+        });
+    }
+
+    function endGame() {
+        timerDisplay.textContent = "Game Over!";
+        imageDisplay.style.display = 'none';
+        buttonContainer.style.display = 'none';
+        scoresContainer.style.display = 'flex';
+        restartGameBtn.style.display = 'flex';
+        const winner = team1Score > team2Score ? 1 : team2Score > team1Score ? 2 : 0;
+        if (winner === 1) {
+            team1ScoreDisplay.classList.add('winner');
+        } else if (winner === 2) {
+            team2ScoreDisplay.classList.add('winner');
+        }
+        startConfetti();
+    }
+
+    function startConfetti() {
+        for (let i = 0; i < 50; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.left = `${Math.random() * 100}%`;
+            confetti.style.animationDelay = `${Math.random() * 2}s`;
+            confetti.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
+            document.querySelector('.game-container').appendChild(confetti);
+            setTimeout(() => confetti.remove(), 2000);
         }
     }
 
@@ -235,16 +541,43 @@
     resetBtn.addEventListener('click', () => {
         team1Score = 0;
         team2Score = 0;
-        team1ScoreDisplay.textContent = `Team 1 Score: 0`;
-        team2ScoreDisplay.textContent = `Team 2 Score: 0`;
-        teamRadios[0].checked = true;
+        team1ScoreDisplay.textContent = `${team1Name} Score: 0`;
+        team2ScoreDisplay.textContent = `${team2Name} Score: 0`;
         usedImages = [];
         availableImages = [...animalImages];
-        updateImage();
+        clearInterval(timerInterval);
+        clearInterval(countdownInterval);
+        timerSeconds = 60;
+        currentRound = 0;
+        totalRounds = 3;
+        currentTeamIndex = 0;
+        timerDisplay.textContent = `Time Remaining: 1:00`;
+        timerDisplay.style.display = 'none';
+        teamPlayingDisplay.style.display = 'none';
+        imageDisplay.style.display = 'none';
+        skipBtn.style.display = 'none';
+        successBtn.style.display = 'none';
+        nextRoundBtn.style.display = 'none';
+        restartGameBtn.style.display = 'none';
+        buttonContainer.style.display = 'none';
+        scoresContainer.style.display = 'none';
+        startContainer.style.display = 'flex';
+        startImage.style.display = 'block';
+        resetBtn.style.display = 'none';
+        team1NameInput.value = team1Name;
+        team2NameInput.value = team2Name;
+        timerSelect.value = "60";
+        roundsSelect.value = "3";
+        timerDisplay.classList.remove('glow');
+        imageDisplay.classList.remove('glow');
+        team1ScoreDisplay.classList.remove('winner');
+        team2ScoreDisplay.classList.remove('winner');
+        document.querySelectorAll('.confetti').forEach(el => el.remove());
     });
 
-    // Load initial image
-    updateImage();
+    startBtn.addEventListener('click', startGame);
+    nextRoundBtn.addEventListener('click', nextRound);
+    restartGameBtn.addEventListener('click', () => resetBtn.click());
 </script>
 </body>
 </html>
