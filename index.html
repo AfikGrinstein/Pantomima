@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animal Image Game - Two Teams</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 10px;
+            min-height: 100vh;
+        }
+        .game-container {
+            text-align: center;
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            margin: auto;
+        }
+        #image-display {
+            width: 100%;
+            height: 50vw; /* Scales with viewport width */
+            max-height: 300px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        #animal-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .button-container {
+            margin: 15px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: clamp(14px, 4vw, 16px); /* Scales font size */
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            flex: 1;
+            max-width: 120px;
+        }
+        #skip-btn {
+            background-color: #ff4444;
+            color: white;
+        }
+        #skip-btn:hover {
+            background-color: #cc0000;
+        }
+        #success-btn {
+            background-color: #00cc00;
+            color: white;
+        }
+        #success-btn:hover {
+            background-color: #009900;
+        }
+        #reset-btn {
+            background-color: #555;
+            color: white;
+        }
+        #reset-btn:hover {
+            background-color: #333;
+        }
+        .scores-container {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .team-score {
+            font-size: clamp(18px, 5vw, 24px); /* Responsive font size */
+            font-weight: bold;
+            flex: 1;
+            text-align: center;
+        }
+        .score-animate {
+            animation: scoreChange 0.5s ease;
+        }
+        @keyframes scoreChange {
+            0% { transform: scale(1); color: #000; }
+            50% { transform: scale(1.2); color: #007bff; }
+            100% { transform: scale(1); color: #000; }
+        }
+        .team-selector {
+            margin: 10px 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .team-selector label {
+            font-size: clamp(14px, 4vw, 16px);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        h1 {
+            font-size: clamp(20px, 6vw, 28px);
+            margin: 10px 0;
+        }
+
+        /* Media query for very small screens */
+        @media (max-width: 400px) {
+            .button-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            button {
+                width: 100%;
+                max-width: 200px;
+            }
+            .team-selector {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <h1>Animal Image Game - Two Teams</h1>
+    <div id="image-display">
+        <img id="animal-image" src="" alt="Animal Image">
+    </div>
+    <div class="team-selector">
+        <label><input type="radio" name="team" value="1" checked> Team 1</label>
+        <label><input type="radio" name="team" value="2"> Team 2</label>
+    </div>
+    <div class="button-container">
+        <button id="skip-btn">Skip</button>
+        <button id="success-btn">Success</button>
+        <button id="reset-btn">Reset</button>
+    </div>
+    <div class="scores-container">
+        <p id="team1-score" class="team-score">Team 1 Score: 0</p>
+        <p id="team2-score" class="team-score">Team 2 Score: 0</p>
+    </div>
+</div>
+
+<script>
+    let team1Score = 0;
+    let team2Score = 0;
+
+    const team1ScoreDisplay = document.getElementById('team1-score');
+    const team2ScoreDisplay = document.getElementById('team2-score');
+    const animalImage = document.getElementById('animal-image');
+    const skipBtn = document.getElementById('skip-btn');
+    const successBtn = document.getElementById('success-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const teamRadios = document.getElementsByName('team');
+
+    // List of animal image URLs (placeholders; replace with your own)
+    const animalImages = [
+        'https://images.unsplash.com/photo-1518791841217-8f162f1e1131', // Cat
+        'https://images.unsplash.com/photo-1534361960057-1988672fe431', // Dog
+        'https://images.unsplash.com/photo-1561948955-570b270e7c36', // Elephant
+        'https://images.unsplash.com/photo-1546182990-dffeafbe841d', // Tiger
+        'https://images.unsplash.com/photo-1596854407944-bf87f6fdd49e', // Panda
+        'https://images.unsplash.com/photo-1519052537078-e630222a2299', // Bear
+        'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55', // Lion
+        'https://images.unsplash.com/photo-1591825473368-c5a5a5a9f8f8', // Monkey (fixed URL)
+    ];
+    let usedImages = [];
+    let availableImages = [...animalImages];
+
+    function getRandomImage() {
+        if (availableImages.length === 0) {
+            availableImages = [...animalImages];
+            usedImages = [];
+        }
+        const randomIndex = Math.floor(Math.random() * availableImages.length);
+        const selectedImage = availableImages[randomIndex];
+        availableImages.splice(randomIndex, 1);
+        usedImages.push(selectedImage);
+        return selectedImage;
+    }
+
+    function updateImage() {
+        animalImage.src = getRandomImage();
+    }
+
+    function getSelectedTeam() {
+        for (const radio of teamRadios) {
+            if (radio.checked) {
+                return parseInt(radio.value);
+            }
+        }
+        return 1;
+    }
+
+    function updateScore(team, change) {
+        if (team === 1) {
+            team1Score += change;
+            team1ScoreDisplay.textContent = `Team 1 Score: ${team1Score}`;
+            team1ScoreDisplay.classList.add('score-animate');
+            setTimeout(() => team1ScoreDisplay.classList.remove('score-animate'), 500);
+        } else {
+            team2Score += change;
+            team2ScoreDisplay.textContent = `Team 2 Score: ${team2Score}`;
+            team2ScoreDisplay.classList.add('score-animate');
+            setTimeout(() => team2ScoreDisplay.classList.remove('score-animate'), 500);
+        }
+    }
+
+    skipBtn.addEventListener('click', () => {
+        const selectedTeam = getSelectedTeam();
+        updateScore(selectedTeam, -1);
+        updateImage();
+    });
+
+    successBtn.addEventListener('click', () => {
+        const selectedTeam = getSelectedTeam();
+        updateScore(selectedTeam, 1);
+        updateImage();
+    });
+
+    resetBtn.addEventListener('click', () => {
+        team1Score = 0;
+        team2Score = 0;
+        team1ScoreDisplay.textContent = `Team 1 Score: 0`;
+        team2ScoreDisplay.textContent = `Team 2 Score: 0`;
+        teamRadios[0].checked = true;
+        usedImages = [];
+        availableImages = [...animalImages];
+        updateImage();
+    });
+
+    // Load initial image
+    updateImage();
+</script>
+</body>
+</html>
